@@ -42,8 +42,8 @@ A bridge library for coupling OpenFOAM (v12.org) with PETSc 3.23.0 linear algebr
 ### Quick Start / 快速安装
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/OpenFOAM-PETSc-Adapter.git
-cd OpenFOAM-PETSc-Adapter
+git clone git@github.com:marefaker/PETSc4FOAM_by_lzr.git
+cd PETSc4FOAM_by_lzr
 
 # Install dependencies (首次运行)
 chmod +x scripts/setup_dependencies.sh
@@ -92,7 +92,7 @@ scalarField solution = FoamToPETSc::vecToField(solver.getSolution());
 3. Run Case / 运行算例
 ```bash
 # Load library in controlDict
-libs ("libOpenFOAM-PETSc-Adapter.so");
+libs ("libPETSc4FOAM_by_lzr.so");
 
 # Execute solver
 mpirun -np 4 myFoamSolver -parallel
