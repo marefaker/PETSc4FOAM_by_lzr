@@ -1,36 +1,36 @@
-# 定位OpenFOAM核心头文件路径（如fvCFD.H）
+# Locate the OpenFOAM header file path, specifically fvCFD.H
 find_path(OPENFOAM_INCLUDE_DIR
     NAMES fvCFD.H
     PATHS /opt/openfoam12/src/OpenFOAM
     NO_DEFAULT_PATH
-    DOC "OpenFOAM核心头文件路径"
+    DOC "Path to the OpenFOAM header file"
 )
 
-# 定位OpenFOAM核心库
+# Locate the OpenFOAM core library
 find_library(OPENFOAM_CORE_LIB
     NAMES OpenFOAM
     PATHS /opt/openfoam12/platforms/linux64GccDPInt32Opt/lib
-    DOC "OpenFOAM核心库路径"
+    DOC "Path to the OpenFOAM core library"
 )
 
-# 定位finiteVolume等关键模块库
+# Locate the finiteVolume module
 find_library(OPENFOAM_FINITEVOLUME_LIB
     NAMES finiteVolume
     PATHS /opt/openfoam12/platforms/linux64GccDPInt32Opt/lib
-    DOC "OpenFOAM有限体积库路径"
+    DOC "Path to the OpenFOAM finiteVolume library"
 )
 
-# 合并库列表
+# Combine the libraries into a list
 set(OPENFOAM_LIBRARIES
     ${OPENFOAM_CORE_LIB}
     ${OPENFOAM_FINITEVOLUME_LIB}
 )
 
-# 验证是否找到所有依赖
+# Verify that the required components are found
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OpenFOAM
     REQUIRED_VARS 
         OPENFOAM_INCLUDE_DIR
         OPENFOAM_LIBRARIES
-    FAIL_MESSAGE "未找到OpenFOAM安装，请检查路径或运行scripts/setup_dependencies.sh"
+    FAIL_MESSAGE "Failed to locate the OpenFOAM installation. Please check the paths or run scripts/setup_dependencies.sh"
 )
