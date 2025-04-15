@@ -3,22 +3,22 @@
 
 using namespace PETSc4FOAM;
 
-// 标量场转PETSc向量
+// Convert scalar field to PETSc vector
 Vec Foam2PETSc::volScalarFieldToVec(const volScalarField& field) {
-    // 获取全局索引映射
+    // Obtain global index mapping
     ISLocalToGlobalMapping mapping;
     Parallel::createGlobalIndexMapping(field.mesh(), &mapping);
 
-    // 创建PETSc向量
+    // Create PETSc vector
     Vec vec;
     VecCreateMPI(PETSC_COMM_WORLD, field.size(), PETSC_DECIDE, &vec);
     VecSetLocalToGlobalMapping(vec, mapping);
 
-    // 获取本地数据指针
+    // Get local data pointer
     PetscScalar* vecValues;
     VecGetArray(vec, &vecValues);
 
-    // 填充数据（假设连续存储）
+    // Fill data (assume continuous storage)
     const scalar* fieldData = field.internalField().cdata();
     std::copy(fieldData, fieldData + field.size(), vecValues);
 
@@ -26,27 +26,27 @@ Vec Foam2PETSc::volScalarFieldToVec(const volScalarField& field) {
     return vec;
 }
 
-// LDU矩阵转AIJ矩阵
+// Convert LDU matrix to AIJ matrix
 Mat Foam2PETSc::lduMatrixToAIJMat(const lduMatrix& lduMat, bool symmetric) {
     const fvMesh& mesh = refCast<const fvMesh>(lduMat.psi().mesh());
     const labelUList& owner = lduMat.lduAddr().ownerAddr();
     const labelUList& neighbour = lduMat.lduAddr().neighbourAddr();
 
-    // 获取全局单元ID映射
+    // Obtain global unit ID mapping
     ISLocalToGlobalMapping mapping;
     Parallel::createGlobalIndexMapping(mesh, &mapping);
 
-    // 创建AIJ矩阵
+    // Create AIJ matrix
     Mat mat;
     MatCreateAIJ(PETSC_COMM_WORLD,
-        mesh.nCells(), mesh.nCells(),  // 本地行列尺寸
+        mesh.nCells(), mesh.nCells(),  // Local row and column sizes
         PETSC_DETERMINE, PETSC_DETERMINE,
-        0, nullptr, 0, nullptr, &mat);  // 预分配非零元素优化
+        0, nullptr, 0, nullptr, &mat);  // Preallocate for non-zero element optimization
 
-    // 填充矩阵元素
+    // Fill matrix elements
     fillMatrixNonzeros(mat, lduMat, mesh.globalData().globalCellNumber());
 
-    // 设置矩阵属性
+    // Set matrix properties
     MatSetOption(mat, MAT_SYMMETRIC, symmetric ? PETSC_TRUE : PETSC_FALSE);
     MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(mat, MAT_FINAL_ASSEMBLY);
@@ -54,7 +54,7 @@ Mat Foam2PETSc::lduMatrixToAIJMat(const lduMatrix& lduMat, bool symmetric) {
     return mat;
 }
 
-// 内部：填充矩阵非零元素
+// Internal: Fill non-zero matrix elements
 void Foam2PETSc::fillMatrixNonzeros(
     Mat mat,
     const lduMatrix& lduMat,
@@ -64,13 +64,13 @@ void Foam2PETSc::fillMatrixNonzeros(
     const scalarField& upper = lduMat.upper();
     const scalarField& lower = lduMat.lower();
 
-    // 填充对角线元素
+    // Fill diagonal elements
     forAll(diag, cellI) {
         PetscInt row = globalCellIDs[cellI];
         MatSetValue(mat, row, row, diag[cellI], INSERT_VALUES);
     }
 
-    // 填充上下三角元素
+    // Fill upper and lower triangular elements
     forAll(upper, faceI) {
         const PetscInt row = globalCellIDs[owner[faceI]];
         const PetscInt col = globalCellIDs[neighbour[faceI]];
