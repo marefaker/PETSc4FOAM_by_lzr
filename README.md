@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![OpenFOAM v12](https://img.shields.io/badge/OpenFOAM-v12-orange)](https://openfoam.org/)
 [![PETSc 3.23](https://img.shields.io/badge/PETSc-3.23-brightgreen)](https://petsc.org/)
+[![Linux WSL2](https://img.shields.io/badge/Linux-WSL2-yellow)](https://learn.microsoft.com/en-us/windows/wsl/)
 
 A bridge library for coupling OpenFOAM (v12.org) with PETSc 3.23.0 linear algebra backend.  
 专为 OpenFOAM v12（.org发行版）与 PETSc 3.23.0 设计的线性代数后端对接库。
