@@ -15,11 +15,11 @@ The program is in active development, and technical contributions are welcome.
 ## Features / 核心功能
 
 - **Seamless Data Conversion**  
-  - Convert OpenFOAM fields (`scalarField/vectorField`) ↔ PETSc `Vec`  
+  - Convert OpenFOAM fields (`scalarField/vectorField`) <=> PETSc `Vec`  
   - Convert OpenFOAM `lduMatrix` <=> PETSc `Mat` (CSR/AIJ format)  
 
   **无缝数据转换**  
-  - OpenFOAM 场数据 (`scalarField/vectorField`) ↔ PETSc `Vec`  
+  - OpenFOAM 场数据 (`scalarField/vectorField`) <=> PETSc `Vec`  
   - OpenFOAM `lduMatrix` <=> PETSc `Mat` (CSR/AIJ 格式)
 
 - **Solver Abstraction**  
