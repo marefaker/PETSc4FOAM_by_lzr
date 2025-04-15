@@ -1,31 +1,31 @@
-﻿#pragma once
-#include "fvCFD.H"  // OpenFOAM核心头文件
+#pragma once
+#include "fvCFD.H"  // Core header file of OpenFOAM
 #include <petscvec.h>
 #include <petscmat.h>
 
 namespace PETSc4FOAM {
 
-    /* *​
-        * @brief OpenFOAM数据结构与PETSc的转换工具集
-        */
-        class Foam2PETSc {
-        public:
-            // 标量场转PETSc向量（支持并行域分解）
-            static Vec volScalarFieldToVec(const volScalarField& field);
+    /**
+     * @brief A utility set for converting OpenFOAM data structures to PETSc
+     */
+    class Foam2PETSc {
+    public:
+        // Convert scalar field to PETSc vector (supports parallel domain decomposition)
+        static Vec volScalarFieldToVec(const volScalarField& field);
 
-            // LDU矩阵转PETSc AIJ矩阵（自动处理对称性）
-            static Mat lduMatrixToAIJMat(const lduMatrix& lduMat, bool symmetric = true);
+        // Convert LDU matrix to PETSc AIJ matrix (automatically handles symmetry)
+        static Mat lduMatrixToAIJMat(const lduMatrix& lduMat, bool symmetric = true);
 
-            // 矢量场转PETSc向量（展开为单列向量）
-            static Vec volVectorFieldToVec(const volVectorField& field);
+        // Convert vector field to PETSc vector (flattened into a single column vector)
+        static Vec volVectorFieldToVec(const volVectorField& field);
 
-        private:
-            // 内部：处理矩阵非零元素填充
-            static void fillMatrixNonzeros(
-                Mat mat,
-                const lduMatrix& lduMat,
-                const labelList& globalCellIDs
-            );
+    private:
+        // Internal: Handle the filling of non-zero elements in the matrix
+        static void fillMatrixNonzeros(
+            Mat mat,
+            const lduMatrix& lduMat,
+            const labelList& globalCellIDs
+        );
     };
 
 } // End namespace PETSc4FOAM
