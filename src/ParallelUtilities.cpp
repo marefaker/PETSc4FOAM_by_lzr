@@ -1,16 +1,16 @@
 ﻿#include "ParallelUtilities.h"
 
-void PETSc4FOAM::Parallel::safeMPIInit(int* argc, char​** ​* argv) {
+void PETSc4FOAM::Parallel::safeMPIInit(int* argc, char** argv) {
     int is_mpi_initialized;
     MPI_Initialized(&is_mpi_initialized);
 
-    // 仅当MPI未初始化时执行
+    // Initialize MPI only if it is not already initialized
     if (!is_mpi_initialized) {
         MPI_Init(argc, argv);
         PetscInitialize(argc, argv, nullptr, nullptr);
     }
 
-    // 确保OpenFOAM与PETSc使用相同通信子
+    // Ensure OpenFOAM and PETSc use the same communicator
     MPI_Comm_set_errhandler(PETSC_COMM_WORLD, MPI_ERRORS_RETURN);
 }
 
@@ -21,8 +21,8 @@ void PETSc4FOAM::Parallel::validateMPIDomain(const fvMesh& mesh) {
 
     if (foamRank != petscRank) {
         FatalErrorInFunction
-            << "MPI进程号不一致：OpenFOAM进程 " << foamRank
-            << " vs PETSc进程 " << petscRank
+            << "MPI process numbers do not match: OpenFOAM process " << foamRank
+            << " vs PETSc process " << petscRank
             << abort(FatalError);
     }
 }
@@ -40,7 +40,7 @@ void PETSc4FOAM::Parallel::createGlobalIndexMapping(
 
     ISLocalToGlobalMappingCreate(
         PETSC_COMM_WORLD,
-        1,  // 每个元素的块大小（标量场为1，矢量场为3）
+        1,  // Block size for each element (1 for scalar fields, 3 for vector fields)
         cellAddr.size(),
         globalIndices,
         PETSC_COPY_VALUES,
