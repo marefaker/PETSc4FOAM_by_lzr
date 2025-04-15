@@ -1,45 +1,132 @@
-cmake_minimum_required(VERSION 3.10)
-project(PETSc4FOAM_by_lzr LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.15)  # Update CMake version for better compatibility
+project(PETSc4FOAM_by_lzr
+    LANGUAGES CXX
+    DESCRIPTION "PETSc/OpenFOAM coupling library"
+    HOMEPAGE_URL "https://github.com/yourusername/PETSc4FOAM"
+)
 
-# Load custom modules
+#--- Module Configuration -------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-find_package(OpenFOAM REQUIRED)
-find_package(PETSc REQUIRED)
 
-# Set C++ standard (consistent with OpenFOAM)
+#--- OpenFOAM Configuration ------------------------------------------------------
+find_package(OpenFOAM 12 REQUIRED
+    COMPONENTS 
+        OpenFOAM          # Core data structures
+        finiteVolume      # FV discretization
+        meshTools         # Mesh operations
+        fileFormats       # File I/O support
+)
+
+#--- PETSc Configuration ---------------------------------------------------------
+find_package(PETSc 3.23 REQUIRED 
+    COMPONENTS 
+        MPI
+        VEC
+        MAT
+        KSP
+)
+
+#--- Compiler Setup --------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable all warnings
-add_compile_options(-Wall -Wextra -Wpedantic)
+# Architecture optimization
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-march=native" SUPPORT_NATIVE_ARCH)
+if(SUPPORT_NATIVE_ARCH)
+    add_compile_options(-march=native)
+endif()
 
-# Check consistency between declarations and definitions
-add_compile_options(-Wmissing-declarations)  # Warn for functions defined without declarations
-add_compile_options(-Wunused-function)       # Warn for unused static functions
+# Warning configuration
+add_compile_options(
+    -Wall -Wextra -Wpedantic
+    -Wno-unused-parameter -Wno-old-style-cast
+)
 
-# Add double-precision compile flag
+# Debug symbols in both debug and release
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
 add_definitions(-DWM_DP)
 
-# Generate shared library
+#--- Main Library Target ---------------------------------------------------------
 add_library(PETSc4FOAM_by_lzr SHARED
     src/Foam2PETSc.cpp
     src/KSPWrapper.cpp
     src/ParallelUtilities.cpp
 )
 
-# Include paths
+#--- Include Directories ---------------------------------------------------------
 target_include_directories(PETSc4FOAM_by_lzr PUBLIC
-    ${OPENFOAM_INCLUDE_DIR}
-    ${PETSC_INCLUDE_DIRS}
-    include/
+    # PETSc headers
+    $<BUILD_INTERFACE:${PETSC_INCLUDE_DIRS}>
+    $<INSTALL_INTERFACE:include>
+    
+    # OpenFOAM module headers
+    ${OPENFOAM_INCLUDE_DIRS}
+    
+    # Project headers
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-# Link libraries
+# System directories for third-party includes
+target_include_system_directories(PETSc4FOAM_by_lzr PRIVATE
+    ${OPENFOAM_SYSTEM_INCLUDES}
+)
+
+#--- Link Configuration ----------------------------------------------------------
 target_link_libraries(PETSc4FOAM_by_lzr PUBLIC
-    ${OPENFOAM_LIBRARIES}
+    # OpenFOAM core libraries
+    ${OPENFOAM_CORE_LIBRARIES}
+    
+    # Essential OpenFOAM modules
+    OpenFOAM::finiteVolume
+    OpenFOAM::meshTools
+    OpenFOAM::fileFormats
+    
+    # PETSc libraries
     ${PETSC_LIBRARIES}
+    
+    # MPI support
+    MPI::MPI_CXX
 )
 
-# Installation rules
-install(TARGETS PETSc4FOAM_by_lzr DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include/PETSc4FOAM)
+#--- RPATH Management ------------------------------------------------------------
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH
+    ${OPENFOAM_LIB_DIR}
+    ${PETSC_LIBRARY_DIRS}
+    $ORIGIN  # For relative path lookup
+)
+
+#--- Installation Settings -------------------------------------------------------
+install(TARGETS PETSc4FOAM_by_lzr
+    ARCHIVE  DESTINATION lib
+    LIBRARY  DESTINATION lib
+    RUNTIME  DESTINATION bin
+)
+
+install(DIRECTORY include/
+    DESTINATION include/PETSc4FOAM
+    PATTERN "*.hpp"
+)
+
+#--- Export Config ---------------------------------------------------------------
+install(EXPORT PETSc4FOAM_Targets
+    FILE PETSc4FOAMConfig.cmake
+    DESTINATION lib/cmake/PETSc4FOAM
+)
+
+#--- Package Metadata ------------------------------------------------------------
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/PETSc4FOAMConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/PETSc4FOAMConfig.cmake
+    INSTALL_DESTINATION lib/cmake/PETSc4FOAM
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/PETSc4FOAMConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
