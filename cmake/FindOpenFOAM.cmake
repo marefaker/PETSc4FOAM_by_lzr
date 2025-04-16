@@ -3753,7 +3753,8 @@ include(FindPackageHandleStandardArgs)
 
 
 
-
+# message(STATUS "OpenFOAM include directory: ${OPENFOAM_INCLUDE_DIR}")
+message(STATUS "OpenFOAM library directory: ${OPENFOAM_LIBRARIES}")
 
 
 
