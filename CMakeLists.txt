@@ -111,7 +111,8 @@ install(TARGETS PETSc4FOAM_by_lzr
 
 install(DIRECTORY include/
     DESTINATION include/PETSc4FOAM
-    PATTERN "*.h" "*.H"  # Include headers
+    PATTERN "*.h" 
+    PATTERN "*.H"  # Include headers
     PATTERN "*.hpp"  # Header files in case of C++
 )
 
