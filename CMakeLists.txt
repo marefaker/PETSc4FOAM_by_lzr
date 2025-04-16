@@ -9,6 +9,8 @@ project(PETSc4FOAM_by_lzr
     HOMEPAGE_URL "https://github.com/marefaker/PETSc4FOAM_by_lzr"
 )
 set(CMAKE_CXX_STANDARD 14)
+set(MPI_CXX_COMPILER /usr/bin/mpicxx)
+set(MPI_C_COMPILER /usr/bin/mpicc)
 
 # Debugging information
 message(STATUS "Project Name: ${PROJECT_NAME}")
