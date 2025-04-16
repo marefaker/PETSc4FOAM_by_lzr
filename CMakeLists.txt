@@ -72,7 +72,7 @@ target_include_directories(PETSc4FOAM_by_lzr PUBLIC
 )
 
 # System directories for third-party includes
-target_include_system_directories(PETSc4FOAM_by_lzr PRIVATE
+target_include_directories(PETSc4FOAM_by_lzr PRIVATE
     ${OPENFOAM_SYSTEM_INCLUDES}
 )
 
