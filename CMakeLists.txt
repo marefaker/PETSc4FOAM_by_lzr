@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.15)  # Update CMake version for better compatibility
+if(POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+endif()
 project(PETSc4FOAM_by_lzr
     LANGUAGES CXX
     DESCRIPTION "PETSc/OpenFOAM coupling library"
     HOMEPAGE_URL "https://github.com/yourusername/PETSc4FOAM"
 )
+
 
 #--- Module Configuration -------------------------------------------------------
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
