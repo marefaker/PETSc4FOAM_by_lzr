@@ -3724,6 +3724,7 @@ set(OPENFOAM_LIBRARIES "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}/lib")
 file(GLOB_RECURSE OPENFOAM_SHARED_LIBS "${OPENFOAM_LIBRARIES}/*.so")
 
 # Extract library names without the path and extension
+set (REQUIRED_LIBS)
 foreach(lib_path IN LISTS OPENFOAM_SHARED_LIBS)
     get_filename_component(lib_name ${lib_path} NAME_WE)
     list(APPEND REQUIRED_LIBS ${lib_name})
@@ -3752,8 +3753,7 @@ find_package_handle_standard_args(OpenFOAM
         OPENFOAM_LIBRARIES
     VERSION_VAR OPENFOAM_VERSION
     
-    FAIL_MESSAGE "\
-OpenFOAM configuration failed. "
+    FAIL_MESSAGE "OpenFOAM configuration failed. "
 )
 
 # Target definition -----------------------------------------------------
