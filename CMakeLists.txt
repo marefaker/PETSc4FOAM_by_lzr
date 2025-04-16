@@ -5,7 +5,7 @@ endif()
 project(PETSc4FOAM_by_lzr
     LANGUAGES CXX
     DESCRIPTION "PETSc/OpenFOAM coupling library"
-    HOMEPAGE_URL "https://github.com/yourusername/PETSc4FOAM"
+    HOMEPAGE_URL "https://github.com/marefaker/PETSc4FOAM_by_lzr"
 )
 
 
@@ -45,7 +45,6 @@ endif()
 # Warning configuration
 add_compile_options(
     -Wall -Wextra -Wpedantic
-    -Wno-unused-parameter -Wno-old-style-cast
 )
 
 # Debug symbols in both debug and release
@@ -98,7 +97,7 @@ target_link_libraries(PETSc4FOAM_by_lzr PUBLIC
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH
-    ${OPENFOAM_LIBRARIES}
+    ${OPENFOAM_LIBRARY_DIRS}
     ${PETSC_LIBRARY_DIRS}
     $ORIGIN  # For relative path lookup
 )
@@ -112,7 +111,8 @@ install(TARGETS PETSc4FOAM_by_lzr
 
 install(DIRECTORY include/
     DESTINATION include/PETSc4FOAM
-    PATTERN "*.hpp"
+    PATTERN "*.h" "*.H"  # Include headers
+    PATTERN "*.hpp"  # Header files in case of C++
 )
 
 #--- Export Config ---------------------------------------------------------------

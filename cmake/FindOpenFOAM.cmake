@@ -5,6 +5,8 @@
 # 3. Version validation
 # 4. Component-based linking
 
+
+
 # Basic path detection ---------------------------------------------------
 if(NOT OPENFOAM_ROOT)
     set(OPENFOAM_ROOT "$ENV{WM_PROJECT_DIR}" CACHE PATH "OpenFOAM installation root")
@@ -43,8 +45,8 @@ function(validate_openfoam_version OPENFOAM_ROOT)
     # Validate the extracted version
     if(NOT version MATCHES "^[0-9]+$")
         message(FATAL_ERROR "Cannot detect valid OpenFOAM version in:\n${version_sources}")
-    elseif(version LESS 11)
-        message(FATAL_ERROR "Requires OpenFOAM >= v11 (found v${version})")
+    elseif(version LESS 11 OR version GREATER 999) # No better methods to exclude OpenFOAM.com releases for now
+        message(FATAL_ERROR "Requires OpenFOAM.org (NOT OpenFOAM.com Release!) >= v11 (found v${version})")
     endif()
 
     message(STATUS "Verified OpenFOAM v${version}")
@@ -55,54 +57,52 @@ validate_openfoam_version(${OPENFOAM_ROOT})
 
 # Modular include path generation ----------------------------------------
 set(OPENFOAM_MODULES
-    conversion
-    fvMeshStitchers
-    motionSolvers
-    sampling
-    MomentumTransportModels
-    dummyThirdParty
-    fvMeshTopoChangers
-    multiphaseModels
-    specieTransfer
-    ODE
-    fileFormats
-    fvModels
-    parallel
-    surfMesh
-    OSspecific
-    finiteVolume
-    fvMotionSolver
-    physicalProperties
-    thermophysicalModels
-    OpenFOAM
-    functionObjects
-    generic
-    polyTopoChange
-    triSurface
-    Pstream
-    fvAgglomerationMethods
-    lagrangian
-    radiationModels
-    twoPhaseModels
-    ThermophysicalTransportModels
-    fvConstraints
-    mesh
-    randomProcesses
-    waves
-    atmosphericModels
-    fvMeshDistributors
-    meshCheck
-    renumber
-    combustionModels
-    fvMeshMovers
-    meshTools
-    rigidBodyMotion
     # All modules included in OpenFOAM v12 listed, delete as needed
+    atmosphericModels
+    combustionModels
+    conversion
+    dummyThirdParty
+    fileFormats
+    finiteVolume
+    functionObjects
+    fvAgglomerationMethods
+    fvConstraints
+    fvMeshDistributors
+    fvMeshMovers
+    fvMeshStitchers
+    fvMeshTopoChangers
+    fvModels
+    fvMotionSolver
+    generic
+    lagrangian
+    mesh
+    meshCheck
+    meshTools
+    momentumSolvers
+    motionSolvers
+    multiphaseModels
+    ODE
+    OpenFOAM
+    parallel
+    physicalProperties
+    polyTopoChange
+    psurface
+    radiationModels
+    randomProcesses
+    renumber
+    rigidBodyMotion
+    sampling
+    specieTransfer
+    surfMesh
+    ThermophysicalTransportModels
+    thermophysicalModels
+    triSurface
+    twoPhaseModels
+    waves
 )
 
 # Configuration parameters
 set(RECURSION_DEPTH 5)  # Control recursion depth (0=current directory only)
-
 
 # Define recursive search function
 function(recursive_include_paths base_dir max_depth output_list)
@@ -138,12 +138,12 @@ foreach(module IN LISTS OPENFOAM_MODULES)
         "${OPENFOAM_ROOT}/src/${module}/lnInclude"
     )
     
-    list(APPEND OPENFOAM_INCLUDE_DIR {module_dirs})
+    list(APPEND OPENFOAM_INCLUDE_DIR ${module_dirs})
 endforeach()
 
 # Add platform paths (with recursion)
 recursive_include_paths(
-    "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}/include"
+    "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}"
     ${RECURSION_DEPTH}
     platform_dirs
 )
@@ -3721,7 +3721,7 @@ find_path(OPENFOAM_INCLUDE_DIR
 set(OPENFOAM_LIBRARIES "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}/lib")
 
 # Automatically detect all shared libraries in the directory
-file(GLOB OPENFOAM_SHARED_LIBS "${OPENFOAM_LIBRARIES}/*.so")
+file(GLOB_RECURSE OPENFOAM_SHARED_LIBS "${OPENFOAM_LIBRARIES}/*.so")
 
 # Extract library names without the path and extension
 foreach(lib_path IN LISTS OPENFOAM_SHARED_LIBS)
@@ -3753,7 +3753,7 @@ find_package_handle_standard_args(OpenFOAM
     VERSION_VAR OPENFOAM_VERSION
     
     FAIL_MESSAGE "\
-    OpenFOAM configuration failed. "
+OpenFOAM configuration failed. "
 )
 
 # Target definition -----------------------------------------------------
