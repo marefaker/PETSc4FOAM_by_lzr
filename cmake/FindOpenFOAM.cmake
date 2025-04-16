@@ -3746,6 +3746,15 @@ list(APPEND OPENFOAM_LIBRARIES ${MPI_CXX_LIBRARIES})
 
 # Final validation ------------------------------------------------------
 include(FindPackageHandleStandardArgs)
+
+
+
+
+
+
+
+
+# Check if all required variables are set
 find_package_handle_standard_args(OpenFOAM
     REQUIRED_VARS 
         OPENFOAM_ROOT
