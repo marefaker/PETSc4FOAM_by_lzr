@@ -13,7 +13,7 @@ project(PETSc4FOAM_by_lzr
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 #--- OpenFOAM Configuration ------------------------------------------------------
-find_package(OpenFOAM 12 REQUIRED
+find_package(OpenFOAM 11 REQUIRED
     COMPONENTS 
         OpenFOAM          # Core data structures
         finiteVolume      # FV discretization
@@ -66,7 +66,7 @@ target_include_directories(PETSc4FOAM_by_lzr PUBLIC
     $<INSTALL_INTERFACE:include>
     
     # OpenFOAM module headers
-    ${OPENFOAM_INCLUDE_DIRS}
+    ${OPENFOAM_INCLUDE_DIR}
     
     # Project headers
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -98,7 +98,7 @@ target_link_libraries(PETSc4FOAM_by_lzr PUBLIC
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 set(CMAKE_INSTALL_RPATH
-    ${OPENFOAM_LIB_DIR}
+    ${OPENFOAM_LIBRARIES}
     ${PETSC_LIBRARY_DIRS}
     $ORIGIN  # For relative path lookup
 )

@@ -124,7 +124,7 @@ function(recursive_include_paths base_dir max_depth output_list)
 endfunction()
 
 # Build path list
-set(OPENFOAM_INCLUDE_PATHS)
+set(OPENFOAM_INCLUDE_DIR)
 foreach(module IN LISTS OPENFOAM_MODULES)
     # Original header file paths (with recursion)
     recursive_include_paths(
@@ -138,7 +138,7 @@ foreach(module IN LISTS OPENFOAM_MODULES)
         "${OPENFOAM_ROOT}/src/${module}/lnInclude"
     )
     
-    list(APPEND OPENFOAM_INCLUDE_PATHS ${module_dirs})
+    list(APPEND OPENFOAM_INCLUDE_DIR {module_dirs})
 endforeach()
 
 # Add platform paths (with recursion)
@@ -147,10 +147,10 @@ recursive_include_paths(
     ${RECURSION_DEPTH}
     platform_dirs
 )
-list(APPEND OPENFOAM_INCLUDE_PATHS ${platform_dirs})
+list(APPEND OPENFOAM_INCLUDE_DIR ${platform_dirs})
 
 # Remove duplicates
-list(REMOVE_DUPLICATES OPENFOAM_INCLUDE_PATHS)
+list(REMOVE_DUPLICATES OPENFOAM_INCLUDE_DIR)
 
 # Key header file detection ----------------------------------------------
 find_path(OPENFOAM_INCLUDE_DIR
@@ -3712,25 +3712,27 @@ find_path(OPENFOAM_INCLUDE_DIR
         fvModels/interRegion/heatTransfer/heatTransfer.H
         fvModels/interRegion/heatTransfer/heatTransferAv/heatTransferAv.H
         fvModels/interRegion/interRegionHeatTransfer/interRegionHeatTransfer.H
-    PATHS ${OPENFOAM_INCLUDE_PATHS}
+    PATHS ${OPENFOAM_INCLUDE_DIR}
     NO_DEFAULT_PATH
     DOC "OpenFOAM modular include directories"
 )
 
 # Dynamic library location -----------------------------------------------
-set(OPENFOAM_LIB_DIR "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}/lib")
-set(REQUIRED_LIBS
-    OpenFOAM          # Core library
-    finiteVolume      # Finite volume library
-    meshTools         # Mesh tools library
-    # Add other libraries as needed...
-)
+set(OPENFOAM_LIBRARIES "${OPENFOAM_ROOT}/platforms/${WM_OPTIONS}/lib")
 
-set(OPENFOAM_LIBRARIES)
+# Automatically detect all shared libraries in the directory
+file(GLOB OPENFOAM_SHARED_LIBS "${OPENFOAM_LIBRARIES}/*.so")
+
+# Extract library names without the path and extension
+foreach(lib_path IN LISTS OPENFOAM_SHARED_LIBS)
+    get_filename_component(lib_name ${lib_path} NAME_WE)
+    list(APPEND REQUIRED_LIBS ${lib_name})
+endforeach()
+
 foreach(lib IN LISTS REQUIRED_LIBS)
     find_library(OPENFOAM_${lib}_LIB
         NAMES ${lib}
-        PATHS ${OPENFOAM_LIB_DIR}
+        PATHS ${OPENFOAM_LIBRARIES}
         NO_DEFAULT_PATH
         DOC "${lib} library path"
     )
@@ -3749,7 +3751,7 @@ find_package_handle_standard_args(OpenFOAM
         OPENFOAM_INCLUDE_DIR
         OPENFOAM_LIBRARIES
     VERSION_VAR OPENFOAM_VERSION
-    HANDLE_COMPONENTS
+    
     FAIL_MESSAGE "\
     OpenFOAM configuration failed. "
 )
